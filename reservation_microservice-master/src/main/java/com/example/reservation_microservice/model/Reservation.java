@@ -10,7 +10,6 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int quantity;
     private String date;
     private String time;
     private String address;
@@ -24,14 +23,6 @@ public class Reservation {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
     }
 
     public String getDate() {
@@ -65,4 +56,5 @@ public class Reservation {
     public void setPanier(Panier panier) {
         this.panier = panier;
     }
+// Getters et Setters (générés par Lombok)
 }
