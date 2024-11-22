@@ -1,6 +1,7 @@
 package com.example.reservation_microservice.model;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -10,8 +11,8 @@ public class Panier {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Article> articles;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PanierItem> items = new ArrayList<>();
 
     private double total;
 
@@ -23,12 +24,12 @@ public class Panier {
         this.id = id;
     }
 
-    public List<Article> getArticles() {
-        return articles;
+    public List<PanierItem> getItems() {
+        return items;
     }
 
-    public void setArticles(List<Article> articles) {
-        this.articles = articles;
+    public void setItems(List<PanierItem> items) {
+        this.items = items;
     }
 
     public double getTotal() {
@@ -38,5 +39,4 @@ public class Panier {
     public void setTotal(double total) {
         this.total = total;
     }
-// Getters et Setters
 }

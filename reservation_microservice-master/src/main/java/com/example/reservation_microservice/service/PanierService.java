@@ -2,6 +2,7 @@ package com.example.reservation_microservice.service;
 
 import com.example.reservation_microservice.model.Article;
 import com.example.reservation_microservice.model.Panier;
+import com.example.reservation_microservice.model.PanierItem;
 import com.example.reservation_microservice.repository.PanierRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,63 +17,55 @@ public class PanierService {
         return panierRepository.save(panier);
     }
 
-    // Méthode pour supprimer un article du panier
-    public Panier removeArticleFromPanier(Long panierId, Long articleId) {
-        // Recherche du panier par son ID
-        Panier panier = panierRepository.findById(panierId)
-                .orElseThrow(() -> new RuntimeException("Panier non trouvé"));
-
-        // Recherche de l'article à supprimer dans la liste des articles du panier
-        Article articleToRemove = panier.getArticles().stream()
-                .filter(article -> article.getId().equals(articleId))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Article non trouvé dans le panier"));
-
-        // Suppression de l'article
-        panier.getArticles().remove(articleToRemove);
-
-        // Mise à jour du total du panier après suppression
-        panier.setTotal(panier.getArticles().stream()
-                .mapToDouble(Article::getTotalPrice)  // Calcul du total avec les articles restants
-                .sum());
-
-        // Sauvegarde du panier mis à jour
-        return panierRepository.save(panier);
+    public Panier getPanierById(Long id) {
+        return panierRepository.findById(id).orElse(null);
     }
 
-    public Panier addArticleToPanier(Long panierId, Article article) {
-        // Recherche du panier existant
+    public Panier addArticleToPanier(Long panierId, Article article, int quantity) {
         Panier panier = panierRepository.findById(panierId)
                 .orElseThrow(() -> new RuntimeException("Panier non trouvé"));
 
         // Vérifie si l'article existe déjà dans le panier
-        boolean articleExists = false;
-        for (Article existingArticle : panier.getArticles()) {
-            if (existingArticle.getId().equals(article.getId())) {
-                // Si l'article existe déjà, on met à jour la quantité
-                existingArticle.setQuantity(existingArticle.getQuantity() + article.getQuantity());
-                articleExists = true;
+        boolean found = false;
+        for (PanierItem item : panier.getItems()) {
+            if (item.getArticle().getId().equals(article.getId())) {
+                item.setQuantity(item.getQuantity() + quantity);
+                found = true;
                 break;
             }
         }
 
-        // Si l'article n'existe pas dans le panier, on l'ajoute avec la quantité spécifiée
-        if (!articleExists) {
-            panier.getArticles().add(article);
+        // Si l'article n'existe pas encore, ajoute un nouvel élément au panier
+        if (!found) {
+            PanierItem newItem = new PanierItem();
+            newItem.setArticle(article);
+            newItem.setQuantity(quantity);
+            panier.getItems().add(newItem);
         }
 
-        // Met à jour le total du panier en fonction des quantités des articles
-        panier.setTotal(panier.getArticles().stream()
-                .mapToDouble(Article::getTotalPrice)  // On utilise getTotalPrice pour chaque article
-                .sum());  // On calcule la somme des totaux de chaque article
+        // Met à jour le total du panier
+        updateTotal(panier);
 
-        // Sauvegarde le panier avec les nouvelles informations
         return panierRepository.save(panier);
     }
 
+    public Panier removeArticleFromPanier(Long panierId, Long articleId) {
+        Panier panier = panierRepository.findById(panierId)
+                .orElseThrow(() -> new RuntimeException("Panier non trouvé"));
 
+        // Recherche et suppression de l'article
+        panier.getItems().removeIf(item -> item.getArticle().getId().equals(articleId));
 
-    public Panier getPanierById(Long id) {
-        return panierRepository.findById(id).orElse(null);
+        // Mise à jour du total après suppression
+        updateTotal(panier);
+
+        return panierRepository.save(panier);
+    }
+
+    private void updateTotal(Panier panier) {
+        double total = panier.getItems().stream()
+                .mapToDouble(PanierItem::getTotalPrice)
+                .sum();
+        panier.setTotal(total);
     }
 }

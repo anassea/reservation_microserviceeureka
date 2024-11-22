@@ -13,11 +13,9 @@ public class PanierController {
     @Autowired
     private PanierService panierService;
 
-    // Création automatique d'un panier sans corps de requête
     @PostMapping
     public Panier createPanier() {
-        Panier panier = new Panier();  // Crée un nouveau panier vide
-        return panierService.savePanier(panier);
+        return panierService.savePanier(new Panier());
     }
 
     @GetMapping("/{id}")
@@ -26,8 +24,8 @@ public class PanierController {
     }
 
     @PostMapping("/{id}/add")
-    public Panier addArticleToPanier(@PathVariable Long id, @RequestBody Article article) {
-        return panierService.addArticleToPanier(id, article);
+    public Panier addArticleToPanier(@PathVariable Long id, @RequestBody Article article, @RequestParam int quantity) {
+        return panierService.addArticleToPanier(id, article, quantity);
     }
 
     @DeleteMapping("/{panierId}/remove/{articleId}")
