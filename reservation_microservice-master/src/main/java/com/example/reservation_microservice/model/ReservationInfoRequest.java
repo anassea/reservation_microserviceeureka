@@ -1,4 +1,4 @@
-package com.example.reservation_microservice.controller;
+package com.example.reservation_microservice.model;
 
 import lombok.Data;
 

@@ -1,6 +1,7 @@
 package com.example.reservation_microservice.controller;
 
 import com.example.reservation_microservice.model.Reservation;
+import com.example.reservation_microservice.model.ReservationInfoRequest;
 import com.example.reservation_microservice.service.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
